@@ -1,0 +1,10 @@
+{
+  "version": "0.0.0",
+  "manifest_version": 3,
+  "name": "E",
+  "description": "This is a Chrome extension which allows you to use more emojis in BaseCamp and Github",
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "E"
+  }
+}
