@@ -8,7 +8,7 @@ import path from 'path';
 export default defineConfig({
   plugins: [
     react(),
- //   crx({ manifest }),
+    crx({ manifest }),
   ],
   resolve: {
     alias: {
