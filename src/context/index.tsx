@@ -1,6 +1,12 @@
-import React, { ReactNode, createContext, useEffect, useState, useRef } from 'react';
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  ReactNode,
+  createContext,
+} from 'react';
 
-const filePath = 'emojis.json';
+import { EMOJI_FILE_PATH, LOCAL_STORAGE_KEY } from '@constants/index';
 
 interface EmojiType {
   emoji: string;
@@ -10,9 +16,10 @@ interface EmojiType {
 
 interface ContextType {
   emojis: EmojiType[];
-  showToast: boolean
-  filterEmojis: (word:string) => void;
-  copyEmoji: () => void;
+  emojisHistory: EmojiType[];
+  showToast: boolean;
+  filterEmojis: (word: string) => void;
+  copyEmoji: (emoji: string) => void;
 }
 
 interface Props {
@@ -21,10 +28,14 @@ interface Props {
 
 export const EmojiContext = createContext<ContextType | undefined>(undefined);
 
+const saveInLocalStorage = (emojis: Array<string>) =>
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(emojis));
+
 const EmojiProvider: React.FC<Props> = ({ children }) => {
   const [emojis, setEmojis] = useState<EmojiType[]>([]);
+  const [emojisHistory, setEmojisHistory] = useState<EmojiType[]>([]);
   const [showToast, setShowToast] = useState(false);
-  const emojiRef = useRef<EmojiType[]>([])
+  const emojiRef = useRef<EmojiType[]>([]);
 
   const filterEmojis = (word: string) => {
     const result = emojiRef.current.filter((emoji) => {
@@ -32,24 +43,37 @@ const EmojiProvider: React.FC<Props> = ({ children }) => {
         return keyword.includes(word);
       });
     });
-  
+
     setEmojis(result);
 
     if (word === '') {
-      setEmojis(emojiRef.current)
+      setEmojis(emojiRef.current);
     }
   };
 
-  const copyEmoji = (emoji) => {
+  const copyEmoji = (emoji: string) => {
+    navigator.clipboard.writeText(emoji);
+
     setShowToast(true);
-    navigator.clipboard.writeText(emoji)
-      setTimeout(() => {
-        setShowToast(false);
-      }, 1500);
-  }
+
+    setTimeout(() => {
+      setShowToast(false);
+    }, 1500);
+
+    const localStorageEmoji = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const emojiHistory = localStorageEmoji ? JSON.parse(localStorageEmoji) : [];
+
+    if (!Array.isArray(emojiHistory)) return;
+    if (emojiHistory.length > 10) return;
+    if(emojiHistory.includes(emoji)) return;
+
+    const newEmojis = [emoji, ...emojiHistory]
+    saveInLocalStorage(newEmojis);
+    setEmojisHistory(newEmojis);
+  };
 
   const fetchEmojis = () => {
-    fetch(filePath)
+    fetch(EMOJI_FILE_PATH)
       .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -58,10 +82,19 @@ const EmojiProvider: React.FC<Props> = ({ children }) => {
       })
       .then((data: EmojiType[]) => {
         setEmojis(data);
-        emojiRef.current = data
+        emojiRef.current = data;
       })
       .catch((error) => {
         console.error('There was a problem with the fetch operation:', error);
+      })
+      .finally(() => {
+        const emojiHistory = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (!emojiHistory) {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]));
+          return setEmojisHistory([]);
+        }
+
+        return setEmojisHistory(JSON.parse(emojiHistory as string));
       });
   };
 
@@ -70,7 +103,15 @@ const EmojiProvider: React.FC<Props> = ({ children }) => {
   }, []);
 
   return (
-    <EmojiContext.Provider value={{ emojis, filterEmojis, copyEmoji, showToast }}>
+    <EmojiContext.Provider
+      value={{
+        emojis,
+        showToast,
+        emojisHistory,
+        copyEmoji,
+        filterEmojis,
+      }}
+    >
       {children}
     </EmojiContext.Provider>
   );

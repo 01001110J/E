@@ -9,7 +9,8 @@
     "paths": {
       "@components/*": ["src/components/*"],
       "@assets/*": ["src/assets/*"],
-      "@context/*": ["src/context/*"]
+      "@context/*": ["src/context/*"],
+      "@constants/*": ["src/constants/*"]
     },
 
     /* Bundler mode */
