@@ -45,7 +45,7 @@ const EmojiProvider: React.FC<Props> = ({ children }) => {
     navigator.clipboard.writeText(emoji)
       setTimeout(() => {
         setShowToast(false);
-      }, 800);
+      }, 1500);
   }
 
   const fetchEmojis = () => {
