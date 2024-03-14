@@ -1,4 +1,18 @@
-const Search = () => {
+import React, { useState, useContext } from 'react'
+
+import { EmojiContext } from '@context/index';
+
+
+const Search: React.FC = () => {
+  const [word, setWord] = useState('')
+  const { filterEmojis } = useContext(EmojiContext);
+
+  const handleOnChange =  ({ target }) => {
+    setWord(target.value)
+    filterEmojis(target.value)
+  }
+
+
   return (
     <form className="max-w-md mx-auto mt-10">
       <label
@@ -31,6 +45,8 @@ const Search = () => {
           className="block w-full p-4 text-sm text-gray-900 border border-gray-300 rounded-lg ps-10 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Search"
           required
+          value={word}
+          onChange={(e) => handleOnChange(e)}
         />
         <button
           type="submit"
@@ -41,6 +57,6 @@ const Search = () => {
       </div>
     </form>
   );
-};
+}
 
 export default Search;

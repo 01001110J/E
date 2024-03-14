@@ -1,4 +1,4 @@
-import React, { ReactNode, createContext, useEffect, useState } from 'react';
+import React, { ReactNode, createContext, useEffect, useState, useRef } from 'react';
 
 const filePath = 'emojis.json';
 
@@ -10,6 +10,9 @@ interface EmojiType {
 
 interface ContextType {
   emojis: EmojiType[];
+  showToast: boolean
+  filterEmojis: (word:string) => void;
+  copyEmoji: () => void;
 }
 
 interface Props {
@@ -20,6 +23,30 @@ export const EmojiContext = createContext<ContextType | undefined>(undefined);
 
 const EmojiProvider: React.FC<Props> = ({ children }) => {
   const [emojis, setEmojis] = useState<EmojiType[]>([]);
+  const [showToast, setShowToast] = useState(false);
+  const emojiRef = useRef<EmojiType[]>([])
+
+  const filterEmojis = (word: string) => {
+    const result = emojiRef.current.filter((emoji) => {
+      return emoji.keywords.some((keyword) => {
+        return keyword.includes(word);
+      });
+    });
+  
+    setEmojis(result);
+
+    if (word === '') {
+      setEmojis(emojiRef.current)
+    }
+  };
+
+  const copyEmoji = (emoji) => {
+    setShowToast(true);
+    navigator.clipboard.writeText(emoji)
+      setTimeout(() => {
+        setShowToast(false);
+      }, 800);
+  }
 
   const fetchEmojis = () => {
     fetch(filePath)
@@ -30,8 +57,8 @@ const EmojiProvider: React.FC<Props> = ({ children }) => {
         return response.json();
       })
       .then((data: EmojiType[]) => {
-        console.log(data);
         setEmojis(data);
+        emojiRef.current = data
       })
       .catch((error) => {
         console.error('There was a problem with the fetch operation:', error);
@@ -42,7 +69,11 @@ const EmojiProvider: React.FC<Props> = ({ children }) => {
     fetchEmojis();
   }, []);
 
-  return <EmojiContext.Provider value={{ emojis }}>{children}</EmojiContext.Provider>;
+  return (
+    <EmojiContext.Provider value={{ emojis, filterEmojis, copyEmoji, showToast }}>
+      {children}
+    </EmojiContext.Provider>
+  );
 };
 
 export default EmojiProvider;
