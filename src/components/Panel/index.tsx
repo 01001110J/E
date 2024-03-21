@@ -11,7 +11,7 @@ const Panel = () => {
       <div className="flex flex-col w-full mb-3">
         <p className="ml-1.5">History</p>
         <div className="flex flex-wrap">
-          {emojisHistory.map(({ emoji }) => (
+          {emojisHistory.map((emoji) => (
             <Emoji emoji={emoji} key={emoji} />
           ))}
         </div>
