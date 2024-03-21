@@ -64,10 +64,15 @@ const EmojiProvider: React.FC<Props> = ({ children }) => {
     const emojiHistory = localStorageEmoji ? JSON.parse(localStorageEmoji) : [];
 
     if (!Array.isArray(emojiHistory)) return;
-    if (emojiHistory.length > 10) return;
-    if(emojiHistory.includes(emoji)) return;
+    if (emojiHistory.includes(emoji)) return;
+    if (emojiHistory.length > 9) {
+      emojiHistory.pop()
+      const newEmojis = [emoji, ...emojiHistory];
+      saveInLocalStorage(newEmojis);
+      return setEmojisHistory(newEmojis);
+    }
 
-    const newEmojis = [emoji, ...emojiHistory]
+    const newEmojis = [emoji, ...emojiHistory];
     saveInLocalStorage(newEmojis);
     setEmojisHistory(newEmojis);
   };
