@@ -6,3 +6,23 @@ body {
   min-width: 375px;
   min-height: 600px;
 }
+
+.emoji {
+  animation: slideIn 0.5s ease-in-out;
+  animation-fill-mode: both;
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateY(50%);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(-10%);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

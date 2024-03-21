@@ -16,7 +16,7 @@ interface EmojiType {
 
 interface ContextType {
   emojis: EmojiType[];
-  emojisHistory: EmojiType[];
+  emojisHistory: string[];
   showToast: boolean;
   filterEmojis: (word: string) => void;
   copyEmoji: (emoji: string) => void;
@@ -26,14 +26,22 @@ interface Props {
   children: ReactNode;
 }
 
-export const EmojiContext = createContext<ContextType | undefined>(undefined);
+const initialContext: ContextType = {
+  emojis: [],
+  emojisHistory: [],
+  showToast: false,
+  filterEmojis: () => null,
+  copyEmoji: () => null,
+};
+
+export const EmojiContext = createContext<ContextType>(initialContext);
 
 const saveInLocalStorage = (emojis: Array<string>) =>
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(emojis));
 
 const EmojiProvider: React.FC<Props> = ({ children }) => {
   const [emojis, setEmojis] = useState<EmojiType[]>([]);
-  const [emojisHistory, setEmojisHistory] = useState<EmojiType[]>([]);
+  const [emojisHistory, setEmojisHistory] = useState<string[]>([]);
   const [showToast, setShowToast] = useState(false);
   const emojiRef = useRef<EmojiType[]>([]);
 
@@ -66,7 +74,7 @@ const EmojiProvider: React.FC<Props> = ({ children }) => {
     if (!Array.isArray(emojiHistory)) return;
     if (emojiHistory.includes(emoji)) return;
     if (emojiHistory.length > 9) {
-      emojiHistory.pop()
+      emojiHistory.pop();
       const newEmojis = [emoji, ...emojiHistory];
       saveInLocalStorage(newEmojis);
       return setEmojisHistory(newEmojis);
